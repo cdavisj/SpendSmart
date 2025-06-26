@@ -1,0 +1,81 @@
+@{
+    ViewData["Title"] = "Create/Edit Expense";
+}
+
+@* 
+   Strongly-typed view that always receives an Expense object:
+   - New empty Expense object (for creation when Id = 0)
+   - Existing Expense object (for editing when Id > 0)
+*@
+@model Expense
+
+<div class="text-center">
+    @* 
+       Conditional rendering - display different titles based on whether we're creating or editing
+       Model?.Id checks if Model exists and has an Id value
+    *@
+    <h1 class="display-4">@(Model?.Id > 0 ? "Edit" : "Create") Expense</h1>
+    <br>
+    <hr>
+    
+    @* 
+       ASP.NET Core form with tag helpers
+       asp-action: Form submits to CreateEditExpenseForm action in HomeController
+       method="post": HTTP POST for form submission (required for data modification)
+    *@
+    <form asp-action="CreateEditExpenseForm" method="post">
+        @* 
+           Hidden field for expense ID - preserves ID during editing
+           asp-for: Creates model binding between input and Expense.Id property
+           Hidden inputs don't appear on page but are included in form submission
+        *@
+        <input type="hidden" asp-for="Id" />
+        
+        <div class="form-group">
+            @* 
+               Label tag helper - creates accessible form label
+               asp-for creates proper "for" attribute linking to input
+            *@
+            <label asp-for="Value" class="form-label">Value:</label>
+            @* 
+               Input tag helper - generates HTML input with model binding
+               ASP.NET Core automatically determines input type based on property type
+               decimal Value property creates type="number" input with step="0.01"
+            *@
+            <input asp-for="Value" class="form-control" />
+        </div>
+        
+        <div class="form-group">
+            <label asp-for="Description" class="form-label">Description:</label>
+            @* 
+               Text input for description field
+               [Required] attribute in model creates client-side validation
+            *@
+            <input asp-for="Description" class="form-control" />
+        </div>
+        
+        <br>
+        
+        @* 
+           Submit button - triggers form submission to CreateEditExpenseForm action
+           Bootstrap CSS classes for styling
+        *@
+        <button type="submit" class="btn btn-primary">
+            @(Model?.Id > 0 ? "Update" : "Create") Expense
+        </button>
+        
+        @* 
+           Cancel link - returns to expenses list without saving
+           asp-action tag helper generates URL to Expenses action
+        *@
+        <a asp-action="Expenses" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
+
+@* 
+   Include client-side validation scripts for form validation
+   Enables real-time validation feedback before form submission
+*@
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

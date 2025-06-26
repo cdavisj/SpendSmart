@@ -1,0 +1,60 @@
+@{
+    ViewData["Title"] = "Home Page";
+}
+
+@* 
+   Razor model directive - tells the view what type of data to expect from controller
+   This creates a strongly-typed view that receives List<Expense> from HomeController.Expenses()
+*@
+@model List<Expense>
+
+<div class="text-center">
+    <h1 class="display-4">Expenses</h1>
+    <br>
+    <hr>
+    @* 
+       ViewBag usage - accessing dynamic data passed from controller
+       @ symbol: Razor syntax for C# code in HTML
+       ViewBag.Expenses contains the total calculated in HomeController
+    *@
+    <h3>Total Expenses: $@ViewBag.Expenses</h3>
+    <br>
+    
+    @* Bootstrap CSS classes for responsive table styling *@
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Value</th>
+                <th>Description</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                @* 
+                   Razor foreach loop - iterates through the strongly-typed Model
+                   Model refers to the List<Expense> passed from the controller
+                   Each expense object has Id, Value, and Description properties
+                *@
+                foreach (var expense in Model) 
+                {
+                    <tr>
+                        <td>@expense.Id</td>
+                        <td>@expense.Value</td>
+                        <td>@expense.Description</td>
+                        <td>
+                            @* 
+                               ASP.NET Core tag helpers - generate URLs to controller actions
+                               asp-action: Specifies controller action method name
+                               asp-route-id: Passes expense.Id as route parameter
+                            *@
+                            <a asp-action="CreateEditExpense" asp-route-id="@expense.Id">Edit</a>
+                            <a asp-action="DeleteExpense" asp-route-id="@expense.Id">Delete</a>
+                        </td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>
