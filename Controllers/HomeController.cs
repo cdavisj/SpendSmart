@@ -8,8 +8,7 @@ using SpendSmart.Data;
 namespace SpendSmart.Controllers;
 
 /// <summary>
-/// Main controller class - handles HTTP requests and returns responses in ASP.NET MVC
-/// Inherits from Controller base class which provides MVC functionality
+/// Handles requests for the main application pages.
 /// </summary>
 public class HomeController : Controller
 {
@@ -17,10 +16,10 @@ public class HomeController : Controller
     private readonly ApplicationDbContext _context;
 
     /// <summary>
-    /// Constructor - ASP.NET Core's dependency injection automatically provides these services
-    /// Logger: For debugging and error tracking
-    /// Context: Entity Framework connection to SQL Server database
+    /// Initializes a new instance of the <see cref="HomeController"/> class.
     /// </summary>
+    /// <param name="logger">The logger instance.</param>
+    /// <param name="context">The database context.</param>
     public HomeController(ILogger<HomeController> logger, ApplicationDbContext context)
     {
         _logger = logger;
@@ -28,97 +27,73 @@ public class HomeController : Controller
     }
 
     /// <summary>
-    /// Home page action - returns the main landing page
-    /// IActionResult: Base return type for all MVC controller actions
+    /// Returns the home page.
     /// </summary>
     public IActionResult Index()
     {
-        return View(); // Returns Views/Home/Index.cshtml
-    }
-
-    /// <summary>
-    /// Expenses listing page - displays all expenses from database
-    /// Demonstrates: Entity Framework queries, ViewBag usage, and passing data to views
-    /// </summary>
-    public IActionResult Expenses() 
-    {
-        // Entity Framework LINQ query - translates to SQL SELECT statement
-        var expenses = _context.Expenses.ToList();
-
-        // Calculate total using LINQ - runs in memory after database query
-        var total = expenses.Sum(expense => expense.Value);
-        
-        // ViewBag: Dynamic way to pass additional data from controller to view
-        ViewBag.Expenses = total;
-
-        // Pass expenses list as the view model to Views/Home/Expenses.cshtml
-        return View(expenses);
-    }
-
-    /// <summary>
-    /// Create/Edit form page - handles both new expense creation and existing expense editing
-    /// Optional parameter: if id is provided, load existing expense; otherwise, create new
-    /// </summary>
-    public IActionResult CreateEditExpense(int? id)
-    {
-        if (id != null) 
-        {
-            // Entity Framework query to find specific expense by primary key
-            // SingleOrDefault: Returns one record or null (safer than Single)
-            var expense = _context.Expenses.SingleOrDefault(expense => expense.Id == id);
-            return View(expense); // Pass existing expense to form
-        }
-
-        // No id provided - return empty form for new expense creation
         return View();
     }
 
     /// <summary>
-    /// Delete expense action - removes expense from database and redirects
-    /// Required parameter: id of expense to delete
+    /// Displays a list of all expenses and the total value.
     /// </summary>
+    public IActionResult Expenses() 
+    {
+        var expenses = _context.Expenses.ToList();
+        var total = expenses.Sum(expense => expense.Value);
+        ViewBag.Expenses = total;
+        return View(expenses);
+    }
+
+    /// <summary>
+    /// Displays the create/edit expense form.
+    /// </summary>
+    /// <param name="id">The ID of the expense to edit, or null to create a new expense.</param>
+    public IActionResult CreateEditExpense(int? id)
+    {
+        if (id != null) 
+        {
+            var expense = _context.Expenses.SingleOrDefault(expense => expense.Id == id);
+            return View(expense);
+        }
+        return View();
+    }
+
+    /// <summary>
+    /// Deletes an expense and redirects to the expenses list.
+    /// </summary>
+    /// <param name="id">The ID of the expense to delete.</param>
     public IActionResult DeleteExpense(int id) 
     {
-        // Find expense to delete using Entity Framework
         var expense = _context.Expenses.SingleOrDefault(expense => expense.Id == id);
-
         if (expense != null)
         {
-            // Entity Framework: Mark for deletion and save changes to SQL Server
             _context.Expenses.Remove(expense);
-            _context.SaveChanges(); // Executes SQL DELETE statement
+            _context.SaveChanges();
         }
-
-        // Redirect to expenses list - Post-Redirect-Get pattern prevents duplicate submissions
         return RedirectToAction("Expenses");
     }
 
     /// <summary>
-    /// Form submission handler - processes create/edit form data
-    /// Model binding: ASP.NET automatically maps form fields to Expense object properties
+    /// Handles form submission for creating or editing an expense.
     /// </summary>
+    /// <param name="model">The expense model from the form.</param>
     public IActionResult CreateEditExpenseForm(Expense model) 
     {
         if (model.Id == 0) 
         {
-            // New expense - Entity Framework tracks this as INSERT
             _context.Expenses.Add(model);
         }
         else
         {
-            // Existing expense - Entity Framework tracks this as UPDATE
             _context.Expenses.Update(model);
         }
-        
-        // SaveChanges: Executes SQL INSERT/UPDATE statements against SQL Server
         _context.SaveChanges();
-
-        // Redirect to prevent form resubmission on browser refresh
         return RedirectToAction("Expenses");
     }
 
     /// <summary>
-    /// Privacy page action - simple static page
+    /// Returns the privacy page.
     /// </summary>
     public IActionResult Privacy()
     {
@@ -126,8 +101,15 @@ public class HomeController : Controller
     }
 
     /// <summary>
-    /// Error handling action - displays error page with request details
-    /// ResponseCache attribute: Prevents error pages from being cached
+    /// Returns the About page.
+    /// </summary>
+    public IActionResult About()
+    {
+        return View();
+    }
+
+    /// <summary>
+    /// Displays the error page.
     /// </summary>
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     public IActionResult Error()
